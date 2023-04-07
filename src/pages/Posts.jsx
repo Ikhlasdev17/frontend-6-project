@@ -9,6 +9,8 @@ const Posts = () => {
 	const [title, setTitle] = useState('')
 	const [body, setBody] = useState('')
 
+	const [modalIsOpen, setModalIsOpen] = useState(false)
+
 	useEffect(() => {
 		setLoading(true)
 		axios
@@ -33,6 +35,8 @@ const Posts = () => {
 				.post('https://jsonplaceholder.typicode.com/posts', data)
 				.then(res => {
 					console.log('success', res)
+					setPosts([res.data, ...posts])
+					setModalIsOpen(false)
 				})
 				.catch(err => {
 					console.log(err)
@@ -42,6 +46,10 @@ const Posts = () => {
 					setBody('')
 				})
 		}
+	}
+
+	const deletePost = id => {
+		setPosts(posts.filter(item => item.id !== id))
 	}
 
 	return (
@@ -54,18 +62,40 @@ const Posts = () => {
 						className='p-4 shadow-md rounded-md min-h-[200px] bg-green-200'
 						key={item?.id}
 					>
-						<h2 className='text-xl font-medium drop-shadow-md text-gray-700'>
-							{item.title}
-						</h2>
+						<div className='min-h-[250px] '>
+							<h2 className='text-xl font-medium drop-shadow-md text-gray-700'>
+								{item.title}
+							</h2>
+							<p className='text-gray-500 italic'>{item.body}</p>
+						</div>
+
+						<button
+							onClick={e => deletePost(item.id)}
+							className='px-6 py-1 rounded-md bg-red-500 text-white shadow-md'
+						>
+							Delete
+						</button>
 					</div>
 				))
 			)}
 
-			<button className='fixed bottom-[100px] right-[50px] py-2 px-4 rounded-md bg-indigo-500 text-white shadow-md hover:bg-indigo-600 transition duration-200'>
+			<button
+				onClick={e => setModalIsOpen(true)}
+				className='fixed bottom-[100px] right-[50px] py-2 px-4 rounded-md bg-indigo-500 text-white shadow-md hover:bg-indigo-600 transition duration-200'
+			>
 				New post
 			</button>
 
-			<Modal />
+			{modalIsOpen ? (
+				<Modal
+					setModalIsOpen={setModalIsOpen}
+					title={title}
+					setTitle={setTitle}
+					body={body}
+					setBody={setBody}
+					createPost={createPost}
+				/>
+			) : null}
 		</div>
 	)
 }
